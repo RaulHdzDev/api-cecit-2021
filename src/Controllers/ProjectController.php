@@ -11,6 +11,9 @@ use App\Services\Project\UploadRegisterForm;
 use App\Services\Project\GetProjectInfo;
 use App\Services\Project\UploadImage;
 
+use App\App\Constants;
+use App\App\Database;
+
 class ProjectController
 {
     public function createOneAuthor(Request $request, Response $response): Response
@@ -60,6 +63,25 @@ class ProjectController
         $params['project_image'] = $files['project_image'] ?? '';
         $uploadImage = new UploadImage($params);
         $response->getBody()->write(json_encode($uploadImage()));
+        return $response;
+    }
+
+    public function fechas(Request $request, Response $response): Response
+    {
+        $sql = "SELECT fechas_proyectos.fecha_inicio, fechas_proyectos.fecha_fin 
+        FROM fechas_proyectos";
+        try{
+            $db = new DataBase();
+            $db = $db->connect();
+        
+            $result = $db->query($sql);
+        
+            if($result->rowCount() > 0) {
+                echo json_encode($result->fetch());
+            }
+        } catch(\Exception $e) {
+            echo '{"error": ' . $e->getMessage() . '}';
+        }
         return $response;
     }
 }
