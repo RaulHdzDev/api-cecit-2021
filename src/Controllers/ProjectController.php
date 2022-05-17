@@ -68,40 +68,19 @@ class ProjectController
 
     public function fechas(Request $request, Response $response): Response
     {
-        $params = (array)$request->getParsedBody();
-        $fecha_inicio = $params['fecha_inicio'];
-        $fecha_fin = $params['fecha_fin'];
+        $sql = "SELECT fechas_proyectos.fecha_inicio, fechas_proyectos.fecha_fin 
+        FROM fechas_proyectos";
         try{
-            $sql = 'SELECT COUNT(*) as total FROM fechas_proyectos';
-            
-            $db = new Database();
+            $db = new DataBase();
             $db = $db->connect();
+        
             $result = $db->query($sql);
-            $count = $result->fetch()['total'];
-            if($count == "0") {
-                $sql = 'INSERT INTO fechas_proyectos (fecha_inicio, fecha_fin)
-                        VALUES  (:fecha_inicio, :fecha_fin);';
-                $result = $db->prepare($sql);
-                $result->bindParam(':fecha_inicio', $fecha_inicio);
-                $result->bindParam(':fecha_fin', $fecha_fin);
-                $result->execute();
-                $response->getBody()->write(json_encode(true));
-            } else {
-                $sql = 'SELECT * FROM fechas_proyectos';
-                $result = $db->query($sql);
-                $id_fechas_proyectos = $result->fetch()['id_fechas_proyectos'];
-                $sql = 'UPDATE fechas_proyectos
-                        SET  fecha_inicio = :fecha_inicio, fecha_fin = :fecha_fin;
-                        WHERE id_fechas_proyectos = :id_fechas_proyectos';
-                $result = $db->prepare($sql);
-                $result->bindParam(':fecha_inicio', $fecha_inicio);
-                $result->bindParam(':fecha_fin', $fecha_fin);
-                $result->bindParam(':id_fechas_proyectos', $id_fechas_proyectos);
-                $result->execute();
-                $response->getBody()->write(json_encode(true));
+        
+            if($result->rowCount() > 0) {
+                echo json_encode($result->fetch());
             }
-        } catch(\Exception $exception) {
-            echo '{"error": ' . $exception->getMessage() . '}';
+        } catch(\Exception $e) {
+            echo '{"error": ' . $e->getMessage() . '}';
         }
         return $response;
     }
